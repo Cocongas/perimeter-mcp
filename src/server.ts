@@ -29,7 +29,17 @@ type Deidentified = {
  * offered when one is configured, so an agent never sees a tool it cannot use.
  */
 export function createServer(version: string, core: CoreConfig | null): McpServer {
-  const server = new McpServer({ name: "perimeter", version });
+  // Clients show this to the model up front; tool descriptions may stay hidden
+  // until the model goes looking. Kept to what is useful and true.
+  const instructions =
+    "perimeter helps with code and text that involve patient or health information. " +
+    "After writing or changing web code that handles such information (forms, calculators, patient pages), " +
+    "perimeter_scan_code checks it locally for common mistakes such as health data saved in browser storage, trackers, and unencrypted requests. " +
+    (core
+      ? "perimeter_deidentify replaces personal identifiers in clinical text with placeholders before the text goes into a prompt, fixture or log. "
+      : "") +
+    "These are precautions. They do not establish compliance with any regulation.";
+  const server = new McpServer({ name: "perimeter", version }, { instructions });
 
   server.registerTool(
     "perimeter_scan_code",
